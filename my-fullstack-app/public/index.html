@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال مستحقات خطيب متعاون</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; padding: 20px; min-height: 100vh; }
+        .container { background-color: #ffffff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 700px; }
+        h2 { text-align: center; color: #1a253c; font-weight: 700; margin-bottom: 30px; }
+        .form-group { margin-bottom: 25px; }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { width: 100%; }
+        label { display: block; margin-bottom: 8px; color: #334155; font-weight: bold; font-size: 14px; }
+        input[type="text"], input[type="date"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background-color: #f8fafc; font-family: 'Tajawal', sans-serif; font-size: 16px; }
+        #prayers-container .prayer-entry { background-color: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
+        #prayers-container .prayer-entry .form-group { margin-bottom: 0; flex-grow: 1; }
+        .remove-btn { background-color: #ef4444; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 30px; text-align: center; flex-shrink: 0; }
+        .add-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background-color: #e0f2fe; color: #0c4a6e; border: 2px dashed #7dd3fc; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, #2563eb, #3b82f6); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        hr { border: none; border-top: 1px solid #e2e8f0; margin: 30px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>نموذج إدخال المستحقات الشهرية</h2>
+        <form id="main-form">
+            <div class="form-group">
+                <label for="preacher-name">اختر اسم الخطيب:</label>
+                <select id="preacher-name" name="الخطيب" required>
+                    <option value="" disabled selected>-- الرجاء الاختيار --</option>
+                    <option value="الخطيب أ: عبدالله">الخطيب أ: عبدالله</option>
+                    <option value="الخطيب ب: محمد">الخطيب ب: محمد</option>
+                    <option value="الخطيب ج: خالد">الخطيب ج: خالد</option>
+                    <option value="الخطيب د: سعد">الخطيب د: سعد</option>
+                    <option value="الخطيب هـ: فهد">الخطيب هـ: فهد</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label for="month">الشهر:</label><select id="month" name="الشهر" required><option value="محرم">محرم</option><option value="صفر">صفر</option><option value="ربيع الأول">ربيع الأول</option><option value="ربيع الآخر">ربيع الآخر</option><option value="جمادى الأولى">جمادى الأولى</option><option value="جمادى الآخرة">جمادى الآخرة</option><option value="رجب">رجب</option><option value="شعبان">شعبان</option><option value="رمضان">رمضان</option><option value="شوال">شوال</option><option value="ذو القعدة">ذو القعدة</option><option value="ذو الحجة">ذو الحجة</option></select></div>
+                <div class="form-group"><label for="year">العام:</label><select id="year" name="العام" required></select></div>
+            </div>
+            <hr>
+            <label>قائمة الخطب (مسجد وتاريخ):</label>
+            <div id="prayers-container"></div>
+            <button type="button" id="add-prayer-btn" class="add-btn"><span>&#43;</span> إضافة خطبة جديدة</button>
+            <button type="submit" class="submit-btn" id="submit-button">إرسال البيانات النهائية</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('main-form');
+            const yearSelect = document.getElementById('year');
+            const prayersContainer = document.getElementById('prayers-container');
+            const addPrayerBtn = document.getElementById('add-prayer-btn');
+            const submitButton = document.getElementById('submit-button');
+
+            for (let i = 1446; i <= 1460; i++) {
+                const option = document.createElement('option');
+                option.value = i + 'هـ'; option.textContent = i + 'هـ';
+                yearSelect.appendChild(option);
+            }
+
+            function createPrayerEntry() {
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('prayer-entry');
+                entryDiv.innerHTML = `<div class="form-group"><input type="text" name="mosque" placeholder="اسم الجامع والحي" required></div><div class="form-group"><input type="date" name="date" required></div><button type="button" class="remove-btn">&times;</button>`;
+                prayersContainer.appendChild(entryDiv);
+                entryDiv.querySelector('.remove-btn').addEventListener('click', () => entryDiv.remove());
+            }
+
+            addPrayerBtn.addEventListener('click', createPrayerEntry);
+            createPrayerEntry();
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitButton.disabled = true;
+                submitButton.textContent = 'جاري الإرسال...';
+                
+                const data = {
+                    'الخطيب': document.getElementById('preacher-name').value,
+                    'الشهر': document.getElementById('month').value,
+                    'العام': document.getElementById('year').value,
+                    'mosques': Array.from(document.querySelectorAll('input[name="mosque"]')).map(input => input.value),
+                    'dates': Array.from(document.querySelectorAll('input[name="date"]')).map(input => input.value)
+                };
+
+                fetch('/.netlify/functions/add-entry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        submitButton.textContent = 'تم الإرسال بنجاح!';
+                        setTimeout(() => {
+                            form.reset();
+                            prayersContainer.innerHTML = '';
+                            createPrayerEntry();
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'إرسال البيانات النهائية';
+                        }, 2000);
+                    } else { throw new Error('Response not successful'); }
+                })
+                .catch(error => {
+                    console.error('Error!', error);
+                    alert('حدث خطأ أثناء الإرسال.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'إرسال البيانات النهائية';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
